@@ -1,4 +1,4 @@
-/* Coach Nelly : le depart, la course, les couloirs. Rien ne tourne si l'utilisateur reduit les animations. */
+/* Coach Nelly : le depart, la course, les sections. Rien ne tourne si l'utilisateur reduit les animations. */
 (function () {
   if (!document.documentElement.classList.contains('js') || !window.gsap) {
     document.documentElement.classList.remove('js');
@@ -64,11 +64,11 @@
     .fromTo('.hl', { clipPath: 'circle(0% at 106% 128%)' }, { clipPath: 'circle(150% at 106% 128%)', duration: 1.7, ease: 'power3.out' }, at + .1)
     .fromTo('.foot', { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, duration: .7 }, at + .55);
 
-  // 2. le heros court : on entre dans le virage
+  // 2. le heros court : le symbole grandit
   gsap.to('.hl', { scale: 1.34, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } });
   gsap.to('h1', { yPercent: -16, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } });
 
-  // 3. les lignes se peignent, les chiffres glissent au sol
+  // 3. les lignes se tracent, le symbole glisse
   $$('.lane').forEach(l => {
     gsap.fromTo(l, { '--ln': 0 }, { '--ln': 1, duration: 1.3, ease: 'expo.out', scrollTrigger: { trigger: l, start: 'top 88%' } });
     const n = $('.num', l);
@@ -131,7 +131,7 @@
     const sy = gsap.quickTo(spot, 'y', { duration: .7, ease: 'power3' });
     addEventListener('pointermove', e => { spot.style.opacity = 1; sx(e.clientX); sy(e.clientY); }, { passive: true });
     document.documentElement.addEventListener('pointerleave', () => { spot.style.opacity = 0; });
-    // les lignes du heros reagissent legerement
+    // le symbole du heros reagit legerement
     const hx = gsap.quickTo('.hl', 'x', { duration: 1.1, ease: 'power3' });
     const hy = gsap.quickTo('.hl', 'y', { duration: 1.1, ease: 'power3' });
     $('.hero').addEventListener('pointermove', e => { hx((e.clientX / innerWidth - .5) * -26); hy((e.clientY / innerHeight - .5) * -18); });
