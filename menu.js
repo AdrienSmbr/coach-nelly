@@ -49,30 +49,20 @@
     stick();
   }
 
-  // questions : un mot, une reponse
-  const tabs = $$('.q');
-  if (tabs.length) {
-    const show = t => {
-      tabs.forEach(b => {
-        const on = b === t;
-        b.setAttribute('aria-selected', on);
-        b.tabIndex = on ? 0 : -1;
-        document.getElementById(b.getAttribute('aria-controls')).classList.toggle('on', on);
-      });
-    };
-    const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
-    tabs.forEach((b, i) => {
-      b.addEventListener('click', () => show(b));
-      if (fine) b.addEventListener('pointerenter', () => show(b));
-      b.addEventListener('keydown', e => {
-        const k = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
-        if (!k) return;
-        e.preventDefault();
-        const n = tabs[(i + k + tabs.length) % tabs.length];
-        show(n);
-        n.focus();
-      });
-    });
+  // questions : la question arrive, Nelly ecrit, la reponse s'affiche. Une fois par echange.
+  const pairs = $$('.pair');
+  if (pairs.length && 'IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const box = $('.chat');
+    box.classList.add('live');
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      if (!e.isIntersecting) return;
+      const p = e.target;
+      io.unobserve(p);
+      p.classList.add('q');
+      setTimeout(() => p.classList.add('a'), 280);
+      setTimeout(() => p.classList.add('t'), 880);
+    }), { rootMargin: '0px 0px -14% 0px' });
+    pairs.forEach(p => io.observe(p));
   }
 
   // avis : les etoiles se posent quand l'avis arrive
