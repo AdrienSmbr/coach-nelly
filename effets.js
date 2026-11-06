@@ -14,6 +14,7 @@
   let lenis = null;
   if (window.Lenis) {
     lenis = new Lenis({ duration: 1.05, easing: t => 1 - Math.pow(1 - t, 3.2) });
+    window.cnLenis = lenis;
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add(t => lenis.raf(t * 1000));
     gsap.ticker.lagSmoothing(0);
@@ -27,7 +28,6 @@
   const split = el => {
     const out = [];
     const txt = el.textContent;
-    el.setAttribute('aria-label', txt);
     el.textContent = '';
     txt.split(' ').forEach((w, i, a) => {
       const span = document.createElement('span');
@@ -48,10 +48,13 @@
 
   // 1. le depart
   const seen = (() => { try { return sessionStorage.getItem('cn-depart'); } catch (e) { return null; } })();
+  const h1 = $('h1');
+  h1.setAttribute('aria-label', $$('h1 i').map(i => i.textContent).join(' '));
   const chars = $$('h1 i').flatMap(split);
   const tl = gsap.timeline({ defaults: { ease: 'expo.out' }, onComplete: () => lenis && lenis.start() });
-  if (lenis) lenis.stop();
-  if (seen) {
+  if (lenis && !(seen || !wide)) lenis.stop();
+  const skip = seen || !wide; // sur telephone, le titre arrive tout de suite
+  if (skip) {
     gsap.set('.start', { display: 'none' });
   } else {
     try { sessionStorage.setItem('cn-depart', '1'); } catch (e) {}
@@ -59,7 +62,7 @@
       .to('.start', { clipPath: 'polygon(100% 0,100% 0,100% 100%,100% 100%)', duration: .8, ease: 'expo.inOut' }, .3)
       .set('.start', { display: 'none' });
   }
-  const at = seen ? 0 : .72;
+  const at = skip ? 0 : .72;
   tl.fromTo(chars, { yPercent: 118 }, { yPercent: 0, duration: .9, stagger: .014 }, at)
     .fromTo('.hl', { clipPath: 'circle(0% at 106% 128%)' }, { clipPath: 'circle(150% at 106% 128%)', duration: 1.7, ease: 'power3.out' }, at + .1)
     .fromTo('.foot', { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, duration: .7 }, at + .55);
@@ -79,17 +82,19 @@
   const items = $$('.big li');
   const lit = p => { const k = Math.round(p * items.length); items.forEach((li, i) => li.classList.toggle('on', i < k)); };
   ScrollTrigger.create(wide
-    ? { trigger: '#sports', start: 'top top', end: '+=120%', pin: true, anticipatePin: 1, onUpdate: s => lit(s.progress) }
+    ? { trigger: '#sports', start: 'top top', end: 'bottom bottom', onUpdate: s => lit(s.progress) }
     : { trigger: '.big', start: 'top 78%', end: 'bottom 55%', onUpdate: s => lit(s.progress) });
 
   // 5. la bande : plus vite quand on scrolle fort
   const band = $('.band div');
   const words = ['prépa physique', 'réathlétisation', 'running', 'basket', 'marche', 'renforcement', 'mobilité'];
-  const sym = '<svg viewBox="' + $('#sym').getAttribute('viewBox') + '"><use href="#sym"/></svg>';
+  const sym = '<svg viewBox="0 0 212 200.3"><use href="#sym"/></svg>';
   const group = words.map(w => '<span>' + w + sym + '</span>').join('');
   band.innerHTML = group + group + group;
-  let x = 0, boost = 0;
+  let x = 0, boost = 0, shown = true;
+  new IntersectionObserver(es => { shown = es[0].isIntersecting; }).observe(band.parentNode);
   gsap.ticker.add((t, dt) => {
+    if (!shown) return;
     const v = lenis ? Math.abs(lenis.velocity) : 0;
     boost += (v * .35 - boost) * .08;
     x -= (1.1 + boost) * (dt / 16.7);
