@@ -140,13 +140,6 @@
     const hx = gsap.quickTo('.hl', 'x', { duration: 1.1, ease: 'power3' });
     const hy = gsap.quickTo('.hl', 'y', { duration: 1.1, ease: 'power3' });
     $('.hero').addEventListener('pointermove', e => { hx((e.clientX / innerWidth - .5) * -26); hy((e.clientY / innerHeight - .5) * -18); });
-    // le bouton attire le pointeur
-    $$('.btn').forEach(b => {
-      const bx = gsap.quickTo(b, 'x', { duration: .45, ease: 'power3' });
-      const by = gsap.quickTo(b, 'y', { duration: .45, ease: 'power3' });
-      b.addEventListener('pointermove', e => { const r = b.getBoundingClientRect(); bx((e.clientX - r.left - r.width / 2) * .16); by((e.clientY - r.top - r.height / 2) * .28); });
-      b.addEventListener('pointerleave', () => { bx(0); by(0); });
-    });
   }
 
   // 9. la course : le chevron descend le couloir

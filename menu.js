@@ -1,4 +1,4 @@
-/* Menu du telephone, formulaire d'objectif et d'avis. Aucune dependance : tourne aussi si les animations sont reduites. */
+/* Menu du telephone, bandeau et phrase du premier bilan. Aucune dependance : tourne aussi si les animations sont reduites. */
 (function () {
   const WA = 'https://wa.me/33664817826?text=';
   const MAIL = 'contact.coachnelly@gmail.com';
@@ -24,7 +24,7 @@
     addEventListener('keydown', e => { if (e.key === 'Escape' && sheet.classList.contains('on')) set(false); });
     matchMedia('(min-width: 821px)').addEventListener('change', e => { if (e.matches) set(false); });
     // la section en cours est signalee dans le menu
-    const links = $$('li a[href*="#"]', sheet);
+    const links = $$('.sheet li a[href*="#"], .top nav a[href*="#"]');
     const secs = links.map(a => document.getElementById(a.hash.slice(1))).filter(Boolean);
     if (secs.length && 'IntersectionObserver' in window) {
       const io = new IntersectionObserver(es => es.forEach(e => {
@@ -41,49 +41,41 @@
     const txt = cta.firstChild, base = [txt.textContent, cta.getAttribute('href')];
     new IntersectionObserver(es => {
       const at = es[0].isIntersecting;
-      txt.textContent = at ? 'Appeler Nelly' : base[0];
+      txt.textContent = at ? 'Appelle-moi' : base[0];
       cta.setAttribute('href', at ? 'tel:+33664817826' : base[1]);
     }, { rootMargin: '0px 0px -40% 0px' }).observe(bilan);
   }
 
-  // premier bilan : l'objectif choisi part dans le message
-  const chips = $$('.chip');
-  const wa = $('#wa'), ml = $('#ml');
-  if (chips.length && wa) {
-    const write = goal => {
-      const t = 'Bonjour Nelly, je voudrais réserver mon premier bilan' + (goal ? '. Mon objectif : ' + goal + '.' : '.');
-      wa.href = WA + encodeURIComponent(t);
-      if (ml) ml.href = 'mailto:' + MAIL + '?subject=' + encodeURIComponent('Premier bilan') + '&body=' + encodeURIComponent(t);
-    };
-    chips.forEach(c => c.addEventListener('click', () => {
-      const on = c.getAttribute('aria-pressed') !== 'true';
-      chips.forEach(x => x.setAttribute('aria-pressed', 'false'));
-      c.setAttribute('aria-pressed', on);
-      write(on ? c.textContent.trim() : '');
-    }));
-    write('');
+  // bandeau : fond plein des qu'on quitte le haut de page
+  const top = $('.top');
+  if (top) {
+    const stick = () => top.classList.toggle('on', scrollY > 24);
+    addEventListener('scroll', stick, { passive: true });
+    stick();
   }
 
-  // avis : rien n'est stocke sur le site, le message part depuis l'appareil de la personne
-  const form = $('#avis-form');
-  if (form) {
-    const err = $('.err', form);
-    const compose = () => {
-      const f = new FormData(form);
-      const g = k => String(f.get(k) || '').trim();
-      if (!g('objectif') || !g('resultat') || !g('prenom')) { err.textContent = 'Remplis les trois champs pour envoyer ton avis.'; return null; }
-      if (!f.get('accord')) { err.textContent = 'Coche la case pour autoriser la publication.'; return null; }
-      err.textContent = '';
-      return 'Mon avis sur Coach Nelly\n\nMon objectif : ' + g('objectif') + '\nCe qui a changé : ' + g('resultat') + '\nPrénom : ' + g('prenom') + '\n\nJ\'autorise la publication de cet avis avec mon prénom sur le site de Coach Nelly.';
-    };
-    form.addEventListener('submit', e => {
+  // premier bilan : la phrase du titre est le message, des exemples s'y ecrivent seuls
+  const goal = $('#goal');
+  if (goal) {
+    const input = $('input', goal);
+    goal.addEventListener('submit', e => {
       e.preventDefault();
-      const t = compose();
-      if (t) location.href = WA + encodeURIComponent(t);
+      const v = input.value.trim().replace(/[.!]+$/, '');
+      const t = 'Bonjour Nelly, ' + (v ? 'je veux ' + v + '. J' : 'j') + "'aimerais réserver mon premier bilan.";
+      location.href = WA + encodeURIComponent(t);
     });
-    $('#avis-mail').addEventListener('click', () => {
-      const t = compose();
-      if (t) location.href = 'mailto:' + MAIL + '?subject=' + encodeURIComponent('Mon avis sur Coach Nelly') + '&body=' + encodeURIComponent(t);
-    });
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const ideas = ['courir 10 km', 'revenir de blessure', 'préparer ma saison', 'reprendre le sport', 'marcher chaque semaine'];
+      let i = 0, n = ideas[0].length, back = true, wait = 26, seen = false;
+      new IntersectionObserver(es => { seen = es[0].isIntersecting; }).observe(goal);
+      setInterval(() => {
+        if (!seen || input.value || document.activeElement === input) return;
+        if (wait > 0) { wait--; return; }
+        n += back ? -1 : 1;
+        input.placeholder = ideas[i].slice(0, n) || ' ';
+        if (back && n === 0) { back = false; i = (i + 1) % ideas.length; }
+        else if (!back && n === ideas[i].length) { back = true; wait = 26; }
+      }, 70);
+    }
   }
 })();
