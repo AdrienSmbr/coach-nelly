@@ -9,11 +9,12 @@
   const btn = $('.mb'), sheet = $('.sheet');
   if (btn && sheet) {
     const label = $('span', btn);
-    const rest = () => $$('body > *').filter(n => !n.matches('.bar,.sheet,script,svg'));
+    const rest = () => $$('body > *').filter(n => !n.matches('.top,.sheet,script,svg'));
     const set = open => {
       btn.setAttribute('aria-expanded', open);
       label.textContent = open ? 'fermer' : 'menu';
       sheet.classList.toggle('on', open);
+      $('.top').classList.toggle('open', open);
       document.documentElement.style.overflow = open ? 'hidden' : '';
       rest().forEach(n => { n.inert = open; });
       if (window.cnLenis) window.cnLenis[open ? 'stop' : 'start']();
@@ -35,23 +36,52 @@
     }
   }
 
-  // arrive au bilan, le bouton du bas devient l'appel direct
-  const cta = $('.cta'), bilan = document.getElementById('bilan');
-  if (cta && bilan && 'IntersectionObserver' in window) {
-    const txt = cta.firstChild, base = [txt.textContent, cta.getAttribute('href')];
-    new IntersectionObserver(es => {
-      const at = es[0].isIntersecting;
-      txt.textContent = at ? 'Appelle-moi' : base[0];
-      cta.setAttribute('href', at ? 'tel:+33664817826' : base[1]);
-    }, { rootMargin: '0px 0px -40% 0px' }).observe(bilan);
-  }
-
   // bandeau : fond plein des qu'on quitte le haut de page
   const top = $('.top');
   if (top) {
-    const stick = () => top.classList.toggle('on', scrollY > 24);
+    const theme = $('meta[name=theme-color]');
+    const stick = () => {
+      const on = scrollY > 24;
+      top.classList.toggle('on', on);
+      if (theme) theme.content = on ? '#2E0D12' : '#78222B';
+    };
     addEventListener('scroll', stick, { passive: true });
     stick();
+  }
+
+  // questions : un mot, une reponse
+  const tabs = $$('.q');
+  if (tabs.length) {
+    const show = t => {
+      tabs.forEach(b => {
+        const on = b === t;
+        b.setAttribute('aria-selected', on);
+        b.tabIndex = on ? 0 : -1;
+        document.getElementById(b.getAttribute('aria-controls')).classList.toggle('on', on);
+      });
+    };
+    const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
+    tabs.forEach((b, i) => {
+      b.addEventListener('click', () => show(b));
+      if (fine) b.addEventListener('pointerenter', () => show(b));
+      b.addEventListener('keydown', e => {
+        const k = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
+        if (!k) return;
+        e.preventDefault();
+        const n = tabs[(i + k + tabs.length) % tabs.length];
+        show(n);
+        n.focus();
+      });
+    });
+  }
+
+  // avis : les etoiles se posent quand l'avis arrive
+  const slabs = $$('.slab');
+  if (slabs.length && 'IntersectionObserver' in window) {
+    const seen = new IntersectionObserver(es => es.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('pop'); seen.unobserve(e.target); }
+    }), { threshold: .12 });
+    slabs.forEach(s => seen.observe(s));
   }
 
   // premier bilan : la phrase du titre est le message, des exemples s'y ecrivent seuls

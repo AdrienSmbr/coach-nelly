@@ -20,7 +20,7 @@
     gsap.ticker.lagSmoothing(0);
     $$('a[href^="#"]').forEach(a => a.addEventListener('click', e => {
       const el = $(a.getAttribute('href'));
-      if (el) { e.preventDefault(); lenis.scrollTo(el, { duration: 1.3 }); }
+      if (el) { e.preventDefault(); lenis.scrollTo(el, { duration: 1.3, offset: -$('.top').offsetHeight }); }
     }));
   }
 
