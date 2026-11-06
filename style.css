@@ -104,6 +104,9 @@ footer nav{display:flex;gap:22px;flex-wrap:wrap}
 .wall{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:0 28px;margin-top:clamp(28px,5vh,48px);border-top:6px solid var(--bleu)}
 .avis{min-height:0;padding-bottom:clamp(64px,10vh,110px)}.note{margin-top:4px;font-weight:600;color:var(--bleu)}
 .say{padding:22px 28px 30px 0;border-bottom:2px solid rgba(199,217,239,.35)}.say.one{grid-column:1/-1;padding-right:0}.say .from{font-weight:600;color:var(--bleu)}.say .to{font:700 clamp(26px,2.5vw,36px)/1.1 var(--t);letter-spacing:-.03em;margin:10px 0 14px}.say.one .to{font-size:clamp(36px,5.4vw,84px);line-height:1;letter-spacing:-.04em;max-width:17em}.say .who{font-size:16px;font-weight:500}.tag{margin-left:10px;padding:3px 7px 2px;background:var(--bleu);color:var(--bordeaux);font:600 13px/1 var(--b)}
+.stars{display:flex;gap:5px;margin-bottom:14px;color:var(--bleu)}.stars svg{width:clamp(26px,2.3vw,32px);height:auto}.say.one .stars{gap:8px;margin-bottom:20px}.say.one .stars svg{width:clamp(42px,5vw,72px);animation:star 420ms var(--out) both}
+.say.one .stars svg:nth-child(2){animation-delay:60ms}.say.one .stars svg:nth-child(3){animation-delay:120ms}.say.one .stars svg:nth-child(4){animation-delay:180ms}.say.one .stars svg:nth-child(5){animation-delay:240ms}
+@keyframes star{from{opacity:0;transform:scale(.8)}}
 .avis .btn{margin-top:clamp(32px,6vh,52px)}
 /* telephone : la barre du pouce et le menu plein ecran */
 @media (max-width:820px){
